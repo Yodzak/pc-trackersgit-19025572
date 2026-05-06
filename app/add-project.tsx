@@ -205,6 +205,7 @@ export default function AddProjectScreen() {
             placeholderTextColor={Colors.slate300}
             value={form.versements}
             onChangeText={(v) => handleChange('versements', v)}
+            keyboardType="numbers-and-punctuation"
             testID="versements-input"
           />
           {form.versements.includes('+') && (
@@ -228,7 +229,7 @@ export default function AddProjectScreen() {
               <Text style={styles.expenseLabel}>{field.label}</Text>
               <TextInput
                 style={styles.expenseInput}
-                placeholder=""
+                placeholder="0"
                 placeholderTextColor={Colors.slate300}
                 value={form[field.key as keyof FormState] as string}
                 onChangeText={(v) => handleChange(field.key as keyof FormState, v)}
@@ -246,6 +247,7 @@ export default function AddProjectScreen() {
             placeholderTextColor={Colors.slate300}
             value={form.autreDepense}
             onChangeText={(v) => handleChange('autreDepense', v)}
+            keyboardType="numbers-and-punctuation"
             testID="autre-depense-input"
           />
           {form.autreDepense.includes('+') && (

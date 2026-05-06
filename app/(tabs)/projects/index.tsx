@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -16,12 +18,22 @@ import { useApp } from '@/providers/AppProvider';
 import { formatCurrency, calculateTotalExpenses, calculateProfit } from '@/utils';
 import { ProjectRecord } from '@/types';
 import * as Haptics from 'expo-haptics';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function ProjectsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { data, deleteProject } = useApp();
+  const { data, deleteProject, isLoading } = useApp();
   const [search, setSearch] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await queryClient.invalidateQueries({ queryKey: ['projects'] });
+    setIsRefreshing(false);
+  }, [queryClient]);
 
   const filteredData = useMemo(() => {
     if (!search.trim()) return data;
@@ -153,19 +165,34 @@ export default function ProjectsScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={filteredData}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <FolderOpen size={48} color={Colors.slate300} />
-            <Text style={styles.emptyText}>Aucun dossier trouvé</Text>
-          </View>
-        }
-      />
+      {isLoading && !isRefreshing && data.length === 0 ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.brandGold} />
+          <Text style={styles.loadingText}>Chargement des dossiers...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredData}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              tintColor={Colors.brandGold}
+              colors={[Colors.brandGold]}
+            />
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <FolderOpen size={48} color={Colors.slate300} />
+              <Text style={styles.emptyText}>Aucun dossier trouvé</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }
@@ -335,5 +362,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.slate400,
     fontWeight: '500' as const,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: Colors.slate500,
+    fontSize: 14,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Wallet, TrendingUp, CreditCard, FileText, LogOut, Plus } from 'lucide-react-native';
@@ -16,17 +17,20 @@ import { formatCurrency, calculateProjectProgress } from '@/utils';
 import { StatsCard } from '@/components/StatsCard';
 import { ProgressBar } from '@/components/ProgressBar';
 import * as Haptics from 'expo-haptics';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, stats, data, logoutMutation } = useApp();
+  const { user, stats, data, logoutMutation, isLoading } = useApp();
   const [refreshing, setRefreshing] = React.useState(false);
+  const queryClient = useQueryClient();
 
   const progressData = useMemo(() => {
     return data
       .filter((item) => item.versements > 0 || calculateProjectProgress(item) > 0)
       .map((item) => ({
+        id: item.id,
         name: item.clientName.length > 18
           ? item.clientName.substring(0, 18) + '...'
           : item.clientName,
@@ -34,15 +38,29 @@ export default function DashboardScreen() {
       }));
   }, [data]);
 
-  const onRefresh = () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 600);
-  };
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['projects'] }),
+      queryClient.invalidateQueries({ queryKey: ['events'] }),
+    ]);
+    setRefreshing(false);
+  }, [queryClient]);
 
   const handleLogout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     logoutMutation.mutate();
   };
+
+  if (isLoading && !refreshing && data.length === 0) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={Colors.brandGold} />
+        <Text style={styles.loadingText}>Chargement du tableau de bord...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -154,17 +172,22 @@ export default function DashboardScreen() {
           {progressData.length > 0 ? (
             progressData.map((item) => (
               <ProgressBar
-                key={item.name}
+                key={item.id}
                 label={item.name}
                 progress={item.progress}
               />
             ))
           ) : (
-            <Text style={styles.emptyText}>Aucun dossier avec des données</Text>
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyText}>Aucun dossier en cours</Text>
+              <TouchableOpacity onPress={() => router.push('/add-project' as any)}>
+                <Text style={styles.createLink}>Créer votre premier dossier</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
-        <View style={{ height: 30 }} />
+        <View style={{ height: 80 }} />
       </ScrollView>
 
       <TouchableOpacity
@@ -183,6 +206,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.brandGray,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: Colors.slate500,
+    fontSize: 14,
   },
   header: {
     backgroundColor: Colors.brandDark,
@@ -330,11 +362,21 @@ const styles = StyleSheet.create({
     color: Colors.slate500,
     fontWeight: '500' as const,
   },
+  emptyState: {
+    paddingVertical: 30,
+    alignItems: 'center',
+    gap: 10,
+  },
   emptyText: {
     fontSize: 14,
     color: Colors.slate400,
     textAlign: 'center',
-    paddingVertical: 30,
+  },
+  createLink: {
+    fontSize: 14,
+    color: Colors.brandDark,
+    fontWeight: '700' as const,
+    textDecorationLine: 'underline',
   },
   fab: {
     position: 'absolute',
