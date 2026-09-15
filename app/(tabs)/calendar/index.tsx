@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -24,6 +23,7 @@ import { Colors } from '@/constants/colors';
 import { useApp } from '@/providers/AppProvider';
 import { CalendarEvent } from '@/types';
 import { getEventTypeLabel } from '@/utils';
+import { showAlert, confirmAction } from '@/utils/dialog';
 import * as Haptics from 'expo-haptics';
 
 const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
@@ -88,7 +88,7 @@ export default function CalendarScreen() {
 
   const handleSaveEvent = () => {
     if (!newEventTitle.trim() || !selectedDateForEvent) {
-      Alert.alert('Erreur', 'Veuillez remplir le titre et la date');
+      showAlert('Erreur', 'Veuillez remplir le titre et la date');
       return;
     }
     addEvent({
@@ -100,12 +100,14 @@ export default function CalendarScreen() {
     setShowModal(false);
   };
 
-  const handleDeleteEvent = (id: number) => {
+  const handleDeleteEvent = async (id: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert('Supprimer ?', 'Supprimer cette alerte ?', [
-      { text: 'Annuler', style: 'cancel' },
-      { text: 'Supprimer', style: 'destructive', onPress: () => deleteEvent(id) },
-    ]);
+    const confirmed = await confirmAction({
+      title: 'Supprimer cette alerte ?',
+      confirmLabel: 'Supprimer',
+      destructive: true,
+    });
+    if (confirmed) deleteEvent(id);
   };
 
   const today = new Date();

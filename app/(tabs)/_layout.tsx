@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, List, Book, Calendar, ClipboardCheck } from 'lucide-react-native';
+import { LayoutDashboard, List, Book, Calendar, ClipboardCheck, FileBarChart2 } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 
 export default function TabLayout() {
@@ -64,6 +64,15 @@ export default function TabLayout() {
           title: 'Calendrier',
           tabBarIcon: ({ color, size }) => (
             <Calendar size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="report"
+        options={{
+          title: 'Rapport',
+          tabBarIcon: ({ color, size }) => (
+            <FileBarChart2 size={size} color={color} />
           ),
         }}
       />

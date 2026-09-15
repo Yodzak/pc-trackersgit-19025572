@@ -14,7 +14,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "pctrackers.app"
     },
     "android": {
@@ -27,13 +27,28 @@
     "web": {
       "favicon": "./assets/images/favicon.png",
       "output": "static",
-      "bundler": "metro"
+      "bundler": "metro",
+      "name": "PC TRACKERS",
+      "shortName": "PC Trackers",
+      "description": "Suivi financier et administratif des dossiers de permis de construire",
+      "lang": "fr",
+      "themeColor": "#2F4F4F",
+      "backgroundColor": "#F3F4F6",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/"
     },
     "plugins": [
       [
         "expo-router",
         {
           "origin": "https://rork.com/"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#D4AF37"
         }
       ]
     ],

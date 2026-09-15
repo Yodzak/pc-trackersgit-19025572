@@ -26,6 +26,10 @@ export interface ProjectRecord {
   expenses: ExpenseDetail;
   checklist: ChecklistItem[];
   notes?: string;
+  /** Date ISO de derniere modification (alimentee par le trigger Postgres). */
+  updatedAt?: string;
+  /** Date ISO de creation du dossier. */
+  createdAt?: string;
 }
 
 export interface DashboardStats {
@@ -48,3 +52,19 @@ export interface User {
   name: string;
   role: 'admin' | 'viewer';
 }
+
+export type ReportFrequency = 'daily' | 'weekly' | 'monthly' | 'off';
+
+export interface UserSettings {
+  staleThresholdDays: number;
+  staleAlertsEnabled: boolean;
+  reportFrequency: ReportFrequency;
+  reportEmail?: string | null;
+}
+
+export const DEFAULT_SETTINGS: UserSettings = {
+  staleThresholdDays: 7,
+  staleAlertsEnabled: true,
+  reportFrequency: 'weekly',
+  reportEmail: null,
+};

@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Animated,
 } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Mail, Lock, ArrowRight, User, Building2 } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { loginMutation } = useApp();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -214,6 +215,16 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </Animated.View>
 
+            {!isSignUp && (
+              <TouchableOpacity
+                style={styles.forgotRow}
+                onPress={() => router.push('/forgot-password' as any)}
+                testID="forgot-password-link"
+              >
+                <Text style={styles.forgotLink}>Mot de passe oublié ?</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity onPress={toggleMode} style={styles.toggleRow}>
               <Text style={styles.toggleText}>
                 {isSignUp ? 'Déjà un compte ? ' : 'Pas de compte ? '}
@@ -363,6 +374,15 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 17,
     fontWeight: '700' as const,
+  },
+  forgotRow: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  forgotLink: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: Colors.slate500,
   },
   toggleRow: {
     alignItems: 'center',

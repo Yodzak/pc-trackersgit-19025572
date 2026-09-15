@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Wallet, TrendingUp, CreditCard, FileText, LogOut, Plus } from 'lucide-react-native';
+import { Wallet, TrendingUp, CreditCard, FileText, LogOut, Plus, AlertTriangle, ChevronRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { useApp } from '@/providers/AppProvider';
@@ -22,9 +23,13 @@ import { useQueryClient } from '@tanstack/react-query';
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { user, stats, data, logoutMutation, isLoading } = useApp();
+  const { user, stats, data, logoutMutation, isLoading, staleProjects, settings } = useApp();
   const [refreshing, setRefreshing] = React.useState(false);
   const queryClient = useQueryClient();
+
+  // Tablette / grand ecran : les 4 cartes tiennent sur une seule ligne.
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
 
   const progressData = useMemo(() => {
     return data
@@ -96,12 +101,37 @@ export default function DashboardScreen() {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isWide && styles.scrollContentWide]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.brandGold} />
         }
       >
+        {staleProjects.length > 0 && (
+          <TouchableOpacity
+            style={styles.staleBanner}
+            onPress={() => router.push('/(tabs)/projects' as any)}
+            activeOpacity={0.85}
+            testID="stale-banner"
+          >
+            <View style={styles.staleIconWrap}>
+              <AlertTriangle size={20} color={Colors.orange} strokeWidth={2.5} />
+            </View>
+            <View style={styles.staleTextWrap}>
+              <Text style={styles.staleTitle}>
+                {staleProjects.length} dossier{staleProjects.length > 1 ? 's' : ''} en sommeil
+              </Text>
+              <Text style={styles.staleSubtitle} numberOfLines={1}>
+                Sans activité depuis plus de {settings.staleThresholdDays} jours
+                {' · '}
+                {staleProjects[0].clientName}
+                {staleProjects.length > 1 ? ` +${staleProjects.length - 1}` : ''}
+              </Text>
+            </View>
+            <ChevronRight size={18} color={Colors.orange} />
+          </TouchableOpacity>
+        )}
+
         <View style={styles.statsGrid}>
           <View style={styles.statsRow}>
             <View style={styles.statsHalf}>
@@ -206,6 +236,46 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.brandGray,
+  },
+  // Tablette / desktop : on borne la largeur pour que les cartes ne
+  // s'etirent pas sur toute la dalle, et on centre le contenu.
+  scrollContentWide: {
+    maxWidth: 900,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  staleBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: Colors.amberBg,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: Colors.amber,
+  },
+  staleIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  staleTextWrap: {
+    flex: 1,
+  },
+  staleTitle: {
+    fontSize: 14,
+    fontWeight: '800' as const,
+    color: Colors.slate800,
+  },
+  staleSubtitle: {
+    fontSize: 11,
+    color: Colors.slate600,
+    marginTop: 2,
   },
   loadingContainer: {
     justifyContent: 'center',

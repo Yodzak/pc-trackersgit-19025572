@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Modal,
   FlatList,
 } from 'react-native';
@@ -16,6 +15,7 @@ import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { X, ChevronDown, Check } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { useApp } from '@/providers/AppProvider';
+import { showAlert } from '@/utils/dialog';
 import { ProjectType } from '@/types';
 import { PROJECT_TYPES, getFormFieldsForType, getChecklistForType } from '@/constants/checklist';
 import * as Haptics from 'expo-haptics';
@@ -108,7 +108,7 @@ export default function AddProjectScreen() {
 
   const handleSave = () => {
     if (!form.clientName.trim()) {
-      Alert.alert('Erreur', 'Le nom du client est requis');
+      showAlert('Erreur', 'Le nom du client est requis');
       return;
     }
 

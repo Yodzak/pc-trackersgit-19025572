@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider, useApp } from "@/providers/AppProvider";
 import { Colors } from "@/constants/colors";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DialogHost } from "@/components/DialogHost";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -20,11 +21,21 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isReady) return;
 
-    const inLoginScreen = segments[0] === ('login' as string);
+    const route = segments[0] as string | undefined;
 
-    if (!user && !inLoginScreen) {
+    // Ecrans accessibles sans etre connecte.
+    const isPublicRoute =
+      route === 'login' || route === 'forgot-password' || route === 'reset-password';
+
+    if (!user && !isPublicRoute) {
       router.replace('/login' as any);
-    } else if (user && inLoginScreen) {
+      return;
+    }
+
+    // Le lien de reinitialisation ouvre une session temporaire. Sans cette
+    // exception, l'utilisateur serait aussitot redirige vers le tableau de
+    // bord et ne pourrait jamais saisir son nouveau mot de passe.
+    if (user && route === 'login') {
       router.replace('/(tabs)/(dashboard)' as any);
     }
   }, [isReady, user, segments]);
@@ -41,6 +52,8 @@ function RootLayoutNav() {
           name="login"
           options={{ headerShown: false, gestureEnabled: false }}
         />
+        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+        <Stack.Screen name="reset-password" options={{ headerShown: false }} />
         <Stack.Screen
           name="add-project"
           options={{
@@ -72,6 +85,9 @@ export default function RootLayout() {
         <GestureHandlerRootView style={layoutStyles.flex}>
           <AppProvider>
             <RootLayoutNav />
+            {/* Monte au-dessus de toute la navigation pour que la modale
+                recouvre l'ecran courant, quel qu'il soit. */}
+            <DialogHost />
           </AppProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>

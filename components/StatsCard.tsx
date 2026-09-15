@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { Colors } from '@/constants/colors';
 
 interface StatsCardProps {
@@ -17,17 +17,23 @@ export const StatsCard: React.FC<StatsCardProps> = React.memo(
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
 
+    // react-native-web ne prend pas en charge le pilote natif : avec
+    // useNativeDriver: true l'animation ne demarre pas et la carte reste
+    // a opacity 0, donc invisible dans le navigateur. On le desactive
+    // uniquement sur le web ; iOS et Android gardent l'animation native.
+    const useNative = Platform.OS !== 'web';
+
     useEffect(() => {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 500,
-          useNativeDriver: true,
+          useNativeDriver: useNative,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 500,
-          useNativeDriver: true,
+          useNativeDriver: useNative,
         }),
       ]).start();
     }, []);
