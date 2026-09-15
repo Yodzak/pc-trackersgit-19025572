@@ -196,3 +196,43 @@ export async function getAttachmentUrl(
   }
   return data.signedUrl;
 }
+
+/** Une piece jointe accompagnee du dossier auquel elle appartient. */
+export interface RecentAttachment extends Attachment {
+  clientName: string;
+}
+
+/**
+ * Dernieres pieces jointes, tous dossiers confondus.
+ * Alimente le bloc « Fichiers recents » du tableau de bord.
+ */
+export async function listRecentAttachments(limit = 6): Promise<RecentAttachment[]> {
+  const { data, error } = await supabase
+    .from('attachments')
+    .select('*, projects!inner("clientName")')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((a: any) => ({
+    id: a.id,
+    projectId: a.project_id,
+    fileName: a.file_name,
+    storagePath: a.storage_path,
+    mimeType: a.mime_type,
+    sizeBytes: a.size_bytes,
+    createdAt: a.created_at,
+    clientName: a.projects?.clientName ?? 'Dossier',
+  }));
+}
+
+/** Quota indicatif affiche dans la jauge du tableau de bord (1 Go). */
+export const STORAGE_QUOTA = 1024 * 1024 * 1024;
+
+/** Espace occupe par l'ensemble des pieces jointes de l'utilisateur. */
+export async function getStorageUsed(): Promise<number> {
+  const { data, error } = await supabase.from('attachments').select('size_bytes');
+  if (error) throw new Error(error.message);
+  return (data ?? []).reduce((sum: number, r: any) => sum + Number(r.size_bytes ?? 0), 0);
+}
