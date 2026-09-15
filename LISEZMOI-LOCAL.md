@@ -282,3 +282,48 @@ Test effectue en neutralisant la confirmation pour qu'elle reponde
 toujours « non » : le message
 « Supprimer le dossier ? — Voulez-vous supprimer le dossier de ... »
 est bien remonte, et les 8 dossiers sont restes intacts.
+
+---
+
+# PIECES JOINTES ET NOUVEAU STYLE
+
+## Pieces jointes
+
+Chaque dossier peut porter plusieurs fichiers : plans, arretes, notices,
+photos de chantier. Section « Pieces jointes » sur l'ecran de detail.
+
+- Stockage prive Supabase, 25 Mo par fichier
+- Ouverture par lien signe valable 1 heure : aucun fichier n'est
+  accessible publiquement
+- Joindre ou retirer un fichier **remonte la date du dossier** : un
+  dossier qu'on documente ne doit pas etre signale « en sommeil »
+- Migration : `db_migration_v3.sql` (deja appliquee)
+
+## Style
+
+Palette reprise de la maquette : bleu nuit, fond bleu tres clair, accent
+bleu vif. Barre laterale sur ecran large (>= 900 px), barre du bas
+conservee sur telephone.
+
+## Ce qui reste a faire sur le style
+
+La maquette comporte trois blocs non encore repris :
+
+1. Cartes « Categories » colorees (violet / turquoise / rose / bleu)
+2. Lignes de fichiers recents avec icone coloree et actions
+3. Panneau de droite : zone d'envoi, jauge de stockage, dossiers partages
+
+Le socle est pose (palette, jetons, barre laterale) : ces blocs sont de
+la mise en page, sans nouvelle logique.
+
+## Etat du depot
+
+Deux commits sur la branche `feat/alertes-rapport-web`. Le push depuis
+cette session est impossible (authentification GitHub interactive) :
+
+```
+cd "D:\PC TRACKER\pc-trackers"
+git push -u origin feat/alertes-rapport-web
+```
+
+Ensuite seulement, la mise en ligne Vercel (etape 5).
