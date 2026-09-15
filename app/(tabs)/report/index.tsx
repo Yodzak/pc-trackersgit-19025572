@@ -150,10 +150,10 @@ export default function ReportScreen() {
             testID="export-report"
           >
             {isExporting ? (
-              <ActivityIndicator size="small" color={Colors.brandDark} />
+              <ActivityIndicator size="small" color={Colors.onBrand} />
             ) : (
               <>
-                <FileDown size={16} color={Colors.brandDark} strokeWidth={2.5} />
+                <FileDown size={16} color={Colors.onBrand} strokeWidth={2.5} />
                 <Text style={styles.exportBtnText}>PDF</Text>
               </>
             )}
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   exportBtnText: {
     fontSize: 13,
     fontWeight: '800' as const,
-    color: Colors.brandDark,
+    color: Colors.onBrand,
   },
   content: { padding: 16, paddingBottom: 40 },
   contentWide: { maxWidth: 900, width: '100%', alignSelf: 'center' },

@@ -226,7 +226,7 @@ export default function DashboardScreen() {
         activeOpacity={0.85}
         testID="add-project-fab"
       >
-        <Plus size={24} color={Colors.brandDark} strokeWidth={3} />
+        <Plus size={24} color={Colors.onBrand} strokeWidth={3} />
       </TouchableOpacity>
     </View>
   );

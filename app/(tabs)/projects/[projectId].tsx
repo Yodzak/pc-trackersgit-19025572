@@ -10,6 +10,7 @@ import { Colors } from '@/constants/colors';
 import { useApp } from '@/providers/AppProvider';
 import { formatCurrency, calculateTotalExpenses, calculateProfit, calculateProjectProgress } from '@/utils';
 import { ProgressBar } from '@/components/ProgressBar';
+import { AttachmentsSection } from '@/components/AttachmentsSection';
 import { Wallet, CreditCard, TrendingUp, FileText } from 'lucide-react-native';
 import { PROJECT_TYPE_LABELS } from '@/constants/checklist';
 
@@ -107,6 +108,8 @@ export default function ProjectDetailScreen() {
           <Text style={styles.totalValue}>{formatCurrency(totalExpenses)} FCFA</Text>
         </View>
       </View>
+
+      <AttachmentsSection projectId={project.id} />
 
       {project.notes ? (
         <View style={styles.sectionCard}>

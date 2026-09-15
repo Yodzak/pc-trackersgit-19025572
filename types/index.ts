@@ -68,3 +68,15 @@ export const DEFAULT_SETTINGS: UserSettings = {
   reportFrequency: 'weekly',
   reportEmail: null,
 };
+
+/** Piece jointe rattachee a un dossier (plan, arrete, photo de chantier...). */
+export interface Attachment {
+  id: number;
+  projectId: number;
+  fileName: string;
+  /** Chemin dans le bucket prive : <user_id>/<project_id>/<fichier>. */
+  storagePath: string;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  createdAt?: string;
+}
